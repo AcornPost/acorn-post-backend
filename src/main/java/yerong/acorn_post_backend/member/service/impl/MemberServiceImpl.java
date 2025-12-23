@@ -3,6 +3,8 @@ package yerong.acorn_post_backend.member.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import yerong.acorn_post_backend.common.response.ApiException;
+import yerong.acorn_post_backend.common.response.ErrorCode;
 import yerong.acorn_post_backend.member.domain.Member;
 import yerong.acorn_post_backend.member.domain.SocialProvider;
 import yerong.acorn_post_backend.member.dto.MemberResponse;
@@ -28,19 +30,22 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MemberResponse findById(Long memberId) {
-
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
-
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
         return MemberResponse.from(member);
     }
 
     @Override
     @Transactional
     public void updateNickname(Long memberId, String newNickname) {
+        if (newNickname == null || newNickname.isBlank()) {
+            throw new yerong.acorn_post_backend.common.response.ApiException(ErrorCode.INVALID_REQUEST, "닉네임은 비어 있을 수 없습니다.");
+        }
+
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
 
         member.updateNickname(newNickname);
     }

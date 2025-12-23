@@ -7,9 +7,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
+import yerong.acorn_post_backend.common.response.ErrorCode;
 import yerong.acorn_post_backend.oauth.exception.JwtAuthException;
 import yerong.acorn_post_backend.oauth.token.JwtTokenProvider;
 import yerong.acorn_post_backend.oauth.token.TokenPair;
+import yerong.acorn_post_backend.oauth.token.TokenType;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +29,8 @@ public class JwtTokenService implements TokenService {
 
     @Override
     public Authentication getAuthentication(String accessToken) {
-        // parse()에서 위조/만료 등 검증됨
-        Long memberId = jwt.getMemberId(accessToken);
-        String role = jwt.getRole(accessToken);
+        Long memberId = jwt.getMemberId(accessToken, TokenType.ACCESS);
+        String role = jwt.getRole(accessToken, TokenType.ACCESS);
 
         return new UsernamePasswordAuthenticationToken(
                 memberId,
@@ -40,38 +41,47 @@ public class JwtTokenService implements TokenService {
 
     @Override
     public long getRemainingMillis(String accessToken) {
-        return jwt.remainingMillis(accessToken);
+        return jwt.remainingMillis(accessToken, TokenType.ACCESS);
     }
 
     @Override
     public TokenPair reissue(String refreshToken) {
-        Long memberId = jwt.getMemberId(refreshToken);
-        String role = jwt.getRole(refreshToken);
+        if (refreshToken == null || refreshToken.isBlank()) {
+            throw new JwtAuthException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+
+        Long memberId = jwt.getMemberId(refreshToken, TokenType.REFRESH);
+        String role = jwt.getRole(refreshToken, TokenType.REFRESH);
 
         String saved = refreshStore.get(memberId);
-        if (saved == null || !saved.equals(refreshToken)) {
-            throw new JwtAuthException("INVALID_REFRESH_TOKEN");
+        if (saved == null) {
+            throw new JwtAuthException(ErrorCode.REFRESH_TOKEN_NOT_FOUND);
+        }
+        if (!saved.equals(refreshToken)) {
+            throw new JwtAuthException(ErrorCode.INVALID_REFRESH_TOKEN);
         }
 
         String newAccess = jwt.createAccessToken(memberId, role);
-        String newRefresh = jwt.createRefreshToken(memberId);
+        String newRefresh = jwt.createRefreshToken(memberId, role);
 
-        refreshStore.save(memberId, newRefresh, jwt.refreshExpMs()); // rotation
+        refreshStore.save(memberId, newRefresh, jwt.refreshExpMs());
         return new TokenPair(newAccess, newRefresh);
     }
 
     @Override
     public TokenPair issue(Long memberId, String role) {
         String access = jwt.createAccessToken(memberId, role);
-        String refresh = jwt.createRefreshToken(memberId);
+        String refresh = jwt.createRefreshToken(memberId, role);
+
         refreshStore.save(memberId, refresh, jwt.refreshExpMs());
         return new TokenPair(access, refresh);
     }
+
     @Override
     public void logout(String accessToken, String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) return;
 
-        Long memberId = jwt.getMemberId(refreshToken);
+        Long memberId = jwt.getMemberId(refreshToken, TokenType.REFRESH);
         refreshStore.delete(memberId);
     }
 }
