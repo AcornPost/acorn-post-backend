@@ -36,4 +36,12 @@ out/
 ### VS Code ###
 .vscode/
 
-src/main/resources/application-oauth.yaml
+application-oauth.yml
+application-prod.yml
+
+.env
+.env.local
+.env.production
+
+*.pem
+*.key
