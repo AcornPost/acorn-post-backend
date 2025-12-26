@@ -22,6 +22,13 @@ public enum ErrorCode {
     // ===== Member =====
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
 
+    // ===== Group =====
+    GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹을 찾을 수 없습니다."),
+    GROUP_CLOSED(HttpStatus.BAD_REQUEST, "이미 종료된 그룹입니다."),
+    GROUP_EXPIRED(HttpStatus.BAD_REQUEST, "마감된 그룹입니다."),
+    ALREADY_JOINED(HttpStatus.CONFLICT, "이미 그룹에 참여하고 있습니다."),
+    JOIN_CODE_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "참여 코드 생성에 실패했습니다."),
+
     // ===== Authorization =====
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다."),
     CONFLICT(HttpStatus.CONFLICT, "요청이 충돌했습니다.");
