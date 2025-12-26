@@ -29,11 +29,13 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(a -> a
                         .requestMatchers(
-                                "/", "/favicon.ico",
-                                "/login", "/login/**",
-                                "/auth/**",
+                                "/", "/favicon.ico", "/error",
                                 "/oauth/naver/**",
-                                "/error"
+                                "/auth/token",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api-docs/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
