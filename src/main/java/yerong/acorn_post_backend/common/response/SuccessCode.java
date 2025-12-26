@@ -16,6 +16,14 @@ public enum SuccessCode {
     GROUP_ALREADY_JOINED(HttpStatus.OK, "이미 참여한 숲입니다."),
     GROUP_LIST_FETCHED(HttpStatus.OK, "내 숲 목록 조회가 성공되었습니다."),
 
+    // ===== Rolling Paper =====
+    ROLLING_GROUP_MEMBERS_FETCHED(HttpStatus.OK, "롤링페이퍼 그룹 멤버 조회가 성공되었습니다."),
+    ROLLING_MEMBER_PAPER_FETCHED(HttpStatus.OK, "롤링페이퍼 편지 조회가 성공되었습니다."),
+    ROLLING_MESSAGE_CREATED(HttpStatus.CREATED, "롤링페이퍼 편지 작성이 성공되었습니다."),
+    ROLLING_MESSAGE_POSITION_UPDATED(HttpStatus.OK, "롤링페이퍼 편지 위치 변경이 성공되었습니다."),
+    ROLLING_MESSAGE_DELETED(HttpStatus.OK, "롤링페이퍼 편지 삭제가 성공되었습니다."),
+    ROLLING_MESSAGE_UPDATED(HttpStatus.OK, "롤링페이퍼 편지 수정이 성공되었습니다."), // [수정 완료]
+
     OK(HttpStatus.OK, "요청이 성공되었습니다."),
     CREATED(HttpStatus.CREATED, "생성이 성공되었습니다.");
 

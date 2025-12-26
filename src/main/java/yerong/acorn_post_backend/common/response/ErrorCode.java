@@ -29,9 +29,17 @@ public enum ErrorCode {
     ALREADY_JOINED(HttpStatus.CONFLICT, "이미 그룹에 참여하고 있습니다."),
     JOIN_CODE_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "참여 코드 생성에 실패했습니다."),
 
+
+    // ===== Rolling Paper =====
+    ROLLING_GROUP_ONLY(HttpStatus.BAD_REQUEST, "롤링페이퍼 그룹에서만 사용할 수 있는 기능입니다."),
+    ROLLING_GROUP_MEMBER_ONLY(HttpStatus.FORBIDDEN, "그룹 멤버만 사용할 수 있는 기능입니다."),
+    ROLLING_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "롤링페이퍼 메시지를 찾을 수 없습니다."),
+    ROLLING_MESSAGE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 멤버에게 메시지를 작성했습니다."),
+
     // ===== Authorization =====
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다."),
-    CONFLICT(HttpStatus.CONFLICT, "요청이 충돌했습니다.");
+    CONFLICT(HttpStatus.CONFLICT, "요청이 충돌했습니다."),
+    ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 멤버에게 메시지를 작성했습니다.");
 
     private final HttpStatus status;
     private final String message;
