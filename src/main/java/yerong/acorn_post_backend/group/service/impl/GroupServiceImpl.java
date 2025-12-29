@@ -22,6 +22,7 @@ import yerong.acorn_post_backend.group.repository.GroupMemberRepository;
 import yerong.acorn_post_backend.group.repository.GroupRepository;
 import yerong.acorn_post_backend.group.service.GroupService;
 import yerong.acorn_post_backend.group.util.JoinCodeGenerator;
+import yerong.acorn_post_backend.manitto.repository.ManittoRoundRepository;
 import yerong.acorn_post_backend.member.domain.Member;
 import yerong.acorn_post_backend.member.repository.MemberRepository;
 
@@ -34,6 +35,7 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMemberRepository groupMemberRepository;
     private final MemberRepository memberRepository;
     private final JoinCodeGenerator joinCodeGenerator;
+    private final ManittoRoundRepository manittoRoundRepository;
 
     @Override
     public CreateGroupResponse createGroup(Long memberId, CreateGroupRequest request) {
@@ -72,9 +74,17 @@ public class GroupServiceImpl implements GroupService {
         Group group = groupRepository.findByJoinCode(request.joinCode())
                 .orElseThrow(() -> new ApiException(ErrorCode.GROUP_NOT_FOUND));
 
+        if (group.getType() == GroupType.MANITTO) {
+            boolean isStarted = manittoRoundRepository.existsByGroup(group);
+            if (isStarted) {
+                throw new ApiException(ErrorCode.MANITTO_MATCHING_STARTED_ALREADY);
+            }
+        }
+
         if (!group.isOpen()) {
             throw new ApiException(ErrorCode.GROUP_CLOSED);
         }
+
 
         if (group.isExpired(LocalDateTime.now())) {
             throw new ApiException(ErrorCode.GROUP_EXPIRED);

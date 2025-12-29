@@ -36,11 +36,23 @@ public enum ErrorCode {
     ROLLING_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "롤링페이퍼 메시지를 찾을 수 없습니다."),
     ROLLING_MESSAGE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 멤버에게 메시지를 작성했습니다."),
 
+    // ===== Manitto =====
+    MANITTO_GROUP_ONLY(HttpStatus.BAD_REQUEST, "마니또 그룹에서만 사용할 수 있는 기능입니다."),
+    MANITTO_GROUP_MEMBER_ONLY(HttpStatus.FORBIDDEN, "마니또 그룹 멤버만 사용할 수 있는 기능입니다."),
+    MANITTO_HOST_ONLY(HttpStatus.FORBIDDEN, "마니또 방장만 사용할 수 있는 기능입니다."),
+    MANITTO_HOST_CANNOT_LEAVE(HttpStatus.BAD_REQUEST, "방장은 그룹을 나갈 수 없습니다. 방 폭파를 사용해주세요."),
+    MANITTO_MIN_PARTICIPANTS_NOT_MET(HttpStatus.BAD_REQUEST, "참가자가 2명 이상일 때만 시작할 수 있습니다."),
+    MANITTO_ROUND_IN_PROGRESS_EXISTS(HttpStatus.CONFLICT, "이미 진행 중인 라운드가 있습니다."),
+    MANITTO_ROUND_NOT_FOUND(HttpStatus.BAD_REQUEST, "진행 중인 라운드를 찾을 수 없습니다."),
+    MANITTO_PREVIOUS_ROUND_NOT_FOUND(HttpStatus.BAD_REQUEST, "이전 라운드를 찾을 수 없습니다."),
+    MANITTO_ROUND_NOT_COMPLETED(HttpStatus.CONFLICT, "이전 라운드가 완료되지 않았습니다."),
+    MANITTO_MATCH_NOT_FOUND(HttpStatus.BAD_REQUEST, "마니또 매칭 정보를 찾을 수 없습니다."),
+    MANITTO_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "마니또 메시지를 찾을 수 없습니다."),
+    MANITTO_MATCHING_STARTED_ALREADY(HttpStatus.BAD_REQUEST, "이미 매칭이 시작된 마니또 숲에는 입장할 수 없습니다."),
     // ===== Authorization =====
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다."),
     CONFLICT(HttpStatus.CONFLICT, "요청이 충돌했습니다."),
     ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 멤버에게 메시지를 작성했습니다.");
-
     private final HttpStatus status;
     private final String message;
 
