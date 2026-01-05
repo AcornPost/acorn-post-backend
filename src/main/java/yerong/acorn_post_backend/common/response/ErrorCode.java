@@ -28,7 +28,7 @@ public enum ErrorCode {
     GROUP_EXPIRED(HttpStatus.BAD_REQUEST, "마감된 그룹입니다."),
     ALREADY_JOINED(HttpStatus.CONFLICT, "이미 그룹에 참여하고 있습니다."),
     JOIN_CODE_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "참여 코드 생성에 실패했습니다."),
-
+    NOT_GROUP_MEMBER(HttpStatus.BAD_REQUEST, "해당 그룹의 멤버가 아닙니다."),
 
     // ===== Rolling Paper =====
     ROLLING_GROUP_ONLY(HttpStatus.BAD_REQUEST, "롤링페이퍼 그룹에서만 사용할 수 있는 기능입니다."),
@@ -49,10 +49,15 @@ public enum ErrorCode {
     MANITTO_MATCH_NOT_FOUND(HttpStatus.BAD_REQUEST, "마니또 매칭 정보를 찾을 수 없습니다."),
     MANITTO_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "마니또 메시지를 찾을 수 없습니다."),
     MANITTO_MATCHING_STARTED_ALREADY(HttpStatus.BAD_REQUEST, "이미 매칭이 시작된 마니또 숲에는 입장할 수 없습니다."),
+
+    // ===== Letter =====
+    LETTER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "편지가 존재하지 않습니다."),
+
     // ===== Authorization =====
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다."),
     CONFLICT(HttpStatus.CONFLICT, "요청이 충돌했습니다."),
-    ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 멤버에게 메시지를 작성했습니다.");
+    ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 멤버에게 메시지를 작성했습니다."),
+    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이 그룹에는 이미 같은 이름이 있습니다.");
     private final HttpStatus status;
     private final String message;
 

@@ -22,7 +22,7 @@ import yerong.acorn_post_backend.group.repository.GroupMemberRepository;
 import yerong.acorn_post_backend.group.repository.GroupRepository;
 import yerong.acorn_post_backend.group.service.GroupService;
 import yerong.acorn_post_backend.group.util.JoinCodeGenerator;
-import yerong.acorn_post_backend.manitto.repository.ManittoRoundRepository;
+import yerong.acorn_post_backend.manitto.repository.ManittoMatchRepository;
 import yerong.acorn_post_backend.member.domain.Member;
 import yerong.acorn_post_backend.member.repository.MemberRepository;
 
@@ -35,7 +35,7 @@ public class GroupServiceImpl implements GroupService {
     private final GroupMemberRepository groupMemberRepository;
     private final MemberRepository memberRepository;
     private final JoinCodeGenerator joinCodeGenerator;
-    private final ManittoRoundRepository manittoRoundRepository;
+    private final ManittoMatchRepository manittoMatchRepository;
 
     @Override
     public CreateGroupResponse createGroup(Long memberId, CreateGroupRequest request) {
@@ -63,8 +63,7 @@ public class GroupServiceImpl implements GroupService {
         );
 
         groupRepository.save(group);
-        groupMemberRepository.save(GroupMember.host(group, host));
-
+        groupMemberRepository.save(GroupMember.host(group, host, host.getNickname()));
         return new CreateGroupResponse(group.getId(), joinCode);
     }
 
@@ -75,7 +74,7 @@ public class GroupServiceImpl implements GroupService {
                 .orElseThrow(() -> new ApiException(ErrorCode.GROUP_NOT_FOUND));
 
         if (group.getType() == GroupType.MANITTO) {
-            boolean isStarted = manittoRoundRepository.existsByGroup(group);
+            boolean isStarted = manittoMatchRepository.existsByGroup(group);
             if (isStarted) {
                 throw new ApiException(ErrorCode.MANITTO_MATCHING_STARTED_ALREADY);
             }
@@ -103,10 +102,16 @@ public class GroupServiceImpl implements GroupService {
                     true
             );
         }
+        if (groupMemberRepository.existsByGroupIdAndGroupNickname(group.getId(), request.nickname())) {
+            throw new ApiException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
-
-        groupMemberRepository.save(GroupMember.member(group, member));
+        String nicknameToUse = (request.nickname() != null && !request.nickname().isBlank())
+                ? request.nickname()
+                : member.getNickname();
+        groupMemberRepository.save(GroupMember.member(group, member, nicknameToUse));
 
         return new JoinGroupResponse(group.getId(), group.getName(), group.getType(), GroupMemberRole.MEMBER, false);
     }
@@ -135,5 +140,19 @@ public class GroupServiceImpl implements GroupService {
         }
 
         return new MyGroupsResponse(manitto, rolling);
+    }
+
+    @Override
+    @Transactional
+    public void updateGroupNickname(Long memberId, Long groupId, String newNickname) {
+        GroupMember groupMember = groupMemberRepository.findByGroupIdAndMemberId(groupId, memberId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_GROUP_MEMBER));
+
+        boolean exists = groupMemberRepository.existsByGroupIdAndGroupNicknameAndMemberIdNot(groupId, newNickname, memberId);
+        if (exists) {
+            throw new ApiException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        groupMember.updateNickname(newNickname);
     }
 }

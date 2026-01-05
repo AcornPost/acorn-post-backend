@@ -7,10 +7,5 @@ import yerong.acorn_post_backend.manitto.domain.ManittoMessage;
 import yerong.acorn_post_backend.member.domain.Member;
 
 public interface ManittoMessageRepository extends JpaRepository<ManittoMessage, Long> {
-
-    List<ManittoMessage> findByGroupAndRoundNumberAndToMemberOrderByCreatedAtAsc(
-            Group group,
-            Integer roundNumber,
-            Member toMember
-    );
+    List<ManittoMessage> findByGroupAndToMemberOrderByCreatedAtAsc(Group group, Member me);
 }

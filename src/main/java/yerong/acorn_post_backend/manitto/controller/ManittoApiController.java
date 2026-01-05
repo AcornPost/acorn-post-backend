@@ -61,15 +61,6 @@ public class ManittoApiController {
         return ApiResponse.success(SuccessCode.MANITTO_REVEALED, null);
     }
 
-    @PostMapping("/groups/{groupId}/restart")
-    public ApiResponse<Void> restart(
-            @PathVariable Long groupId
-    ) {
-        Long memberId = currentMember.get();
-        manittoService.restart(memberId, groupId);
-        return ApiResponse.success(SuccessCode.MANITTO_ROOM_RESTARTED, null);
-    }
-
     @PostMapping("/groups/{groupId}/messages")
     public ApiResponse<Void> sendMessage(
             @PathVariable Long groupId,

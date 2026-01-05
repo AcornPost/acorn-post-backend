@@ -12,8 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 import yerong.acorn_post_backend.common.response.ApiResponse;
 import yerong.acorn_post_backend.common.response.SuccessCode;
 import yerong.acorn_post_backend.common.security.CurrentMemberIdResolver;
+import yerong.acorn_post_backend.group.dto.MyGroupsResponse;
 import yerong.acorn_post_backend.rolling.dto.GroupMembersResponse;
 import yerong.acorn_post_backend.rolling.dto.MemberPaperResponse;
+import yerong.acorn_post_backend.rolling.dto.MyRollingGroupsResponse;
 import yerong.acorn_post_backend.rolling.dto.UpdatePositionRequest;
 import yerong.acorn_post_backend.rolling.dto.WriteMessageRequest;
 import yerong.acorn_post_backend.rolling.dto.WriteMessageResponse;
@@ -21,20 +23,19 @@ import yerong.acorn_post_backend.rolling.service.RollingPaperService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/rolling/groups/{groupId}")
+@RequestMapping("/rolling/groups")
 public class RollingPaperApiController {
     private final RollingPaperService rollingPaperService;
     private final CurrentMemberIdResolver currentMember;
 
-    @GetMapping("/members")
+    @GetMapping("/{groupId}/members")
     public ApiResponse<GroupMembersResponse> getMembers(@PathVariable Long groupId) {
         Long memberId = currentMember.get();
         GroupMembersResponse result = rollingPaperService.getGroupMembers(memberId, groupId);
         return ApiResponse.success(SuccessCode.ROLLING_GROUP_MEMBERS_FETCHED, result);
     }
 
-    @GetMapping("/papers/{targetMemberId}")
-    public ApiResponse<MemberPaperResponse> getMemberPaper(
+    @GetMapping("/{groupId}/papers/{targetMemberId}")    public ApiResponse<MemberPaperResponse> getMemberPaper(
             @PathVariable Long groupId,
             @PathVariable Long targetMemberId
     ) {
@@ -43,7 +44,7 @@ public class RollingPaperApiController {
         return ApiResponse.success(SuccessCode.ROLLING_MEMBER_PAPER_FETCHED, result);
     }
 
-    @PostMapping("/messages")
+    @PostMapping("/{groupId}/messages")
     public ApiResponse<WriteMessageResponse> writeMessage(
             @PathVariable Long groupId,
             @RequestBody WriteMessageRequest request
@@ -53,7 +54,7 @@ public class RollingPaperApiController {
         return ApiResponse.success(SuccessCode.ROLLING_MESSAGE_CREATED, result);
     }
 
-    @PatchMapping("/messages/position")
+    @PatchMapping("/{groupId}/messages/position")
     public ApiResponse<Void> updatePosition(
             @PathVariable Long groupId,
             @RequestBody UpdatePositionRequest request
@@ -63,7 +64,7 @@ public class RollingPaperApiController {
         return ApiResponse.success(SuccessCode.ROLLING_MESSAGE_POSITION_UPDATED, null);
     }
 
-    @DeleteMapping("/messages/{messageId}")
+    @DeleteMapping("/{groupId}/messages/{messageId}")
     public ApiResponse<Void> deleteMessage(
             @PathVariable Long groupId,
             @PathVariable Long messageId
@@ -72,7 +73,7 @@ public class RollingPaperApiController {
         rollingPaperService.deleteMessage(memberId, groupId, messageId);
         return ApiResponse.success(SuccessCode.ROLLING_MESSAGE_DELETED, null);
     }
-    @PatchMapping("/messages/{messageId}")
+    @PatchMapping("/{groupId}/messages/{messageId}")
     public ApiResponse<Void> updateMessage(
             @PathVariable Long groupId,
             @PathVariable Long messageId,
@@ -81,5 +82,11 @@ public class RollingPaperApiController {
         Long memberId = currentMember.get();
         rollingPaperService.updateMessage(memberId, groupId, messageId, request);
         return ApiResponse.success(SuccessCode.ROLLING_MESSAGE_UPDATED, null);
+    }
+    @GetMapping("/me")
+    public ApiResponse<MyRollingGroupsResponse> getMyGroups() {
+        Long memberId = currentMember.get();
+        MyRollingGroupsResponse result = rollingPaperService.getMyJoinedGroups(memberId);
+        return ApiResponse.success(SuccessCode.ROLLING_GROUP_LIST_FETCHED, result);
     }
 }

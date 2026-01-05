@@ -41,29 +41,29 @@ public class ManittoMatch extends BaseTimeEntity {
     @JoinColumn(name = "receiver_member_id", nullable = false)
     private Member receiver;
 
-    @Column(name = "round_number", nullable = false)
-    private Integer roundNumber;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private MissionType mission;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ManittoMatchStatus status;
 
-    private ManittoMatch(Group group, Member giver, Member receiver, Integer roundNumber) {
+    private ManittoMatch(Group group, Member giver, Member receiver, MissionType mission) {
         this.group = group;
         this.giver = giver;
         this.receiver = receiver;
-        this.roundNumber = roundNumber;
+        this.mission = mission;
         this.status = ManittoMatchStatus.ACTIVE;
     }
 
-    public static ManittoMatch create(Group group, Member giver, Member receiver, Integer roundNumber) {
-        return new ManittoMatch(group, giver, receiver, roundNumber);
+    public static ManittoMatch create(Group group, Member giver, Member receiver, MissionType mission) {
+        return new ManittoMatch(group, giver, receiver, mission);
     }
 
     public void reveal() {
         this.status = ManittoMatchStatus.REVEALED;
     }
-
     public boolean isActive() {
         return this.status == ManittoMatchStatus.ACTIVE;
     }
