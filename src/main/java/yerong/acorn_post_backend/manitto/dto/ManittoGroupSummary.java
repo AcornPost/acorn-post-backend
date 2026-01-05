@@ -13,9 +13,9 @@ public record ManittoGroupSummary(
         boolean isHost
 ) {
     public enum GroupStatus {
-        WAITING,      // 매칭 대기
-        IN_PROGRESS,  // 진행중
-        COMPLETED,    // 완료
-        EXPIRED       // 기간 만료
+        WAITING,
+        IN_PROGRESS,
+        COMPLETED,
+        EXPIRED
     }
 }

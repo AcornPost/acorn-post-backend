@@ -11,4 +11,6 @@ public interface GroupService {
     CreateGroupResponse createGroup(Long memberId, CreateGroupRequest request);
     JoinGroupResponse joinGroup(Long memberId, JoinGroupRequest request);
     MyGroupsResponse getMyGroups(Long memberId);
+    void updateGroupNickname(Long memberId, Long groupId, String newNickname);
 }
+

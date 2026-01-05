@@ -21,6 +21,7 @@ import yerong.acorn_post_backend.rolling.dto.GroupMemberSummary;
 import yerong.acorn_post_backend.rolling.dto.GroupMembersResponse;
 import yerong.acorn_post_backend.rolling.dto.MemberPaperResponse;
 import yerong.acorn_post_backend.rolling.dto.MessageDetailResponse;
+import yerong.acorn_post_backend.rolling.dto.MyRollingGroupsResponse;
 import yerong.acorn_post_backend.rolling.dto.UpdatePositionRequest;
 import yerong.acorn_post_backend.rolling.dto.WriteMessageRequest;
 import yerong.acorn_post_backend.rolling.dto.WriteMessageResponse;
@@ -237,5 +238,29 @@ public class RollingPaperServiceImpl implements RollingPaperService {
                 request.shape(),
                 request.font()
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public MyRollingGroupsResponse getMyJoinedGroups(Long memberId) {
+        List<GroupMember> participations = groupMemberRepository
+                .findAllByMember_IdAndStatus(memberId, GroupMemberStatus.ACTIVE);
+
+        List<MyRollingGroupsResponse.MyGroupSummary> rollingPaperGroups = participations.stream()
+                .map(GroupMember::getGroup)
+                .filter(group -> group.getType() == GroupType.ROLLING_PAPER)
+                .map(group -> {
+                    int count = groupMemberRepository.countByGroup_IdAndStatus(group.getId(), GroupMemberStatus.ACTIVE);
+
+                    return new MyRollingGroupsResponse.MyGroupSummary(
+                            group.getId(),
+                            group.getName(),
+                            group.getDeadline().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),
+                            count
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new MyRollingGroupsResponse(rollingPaperGroups);
     }
 }

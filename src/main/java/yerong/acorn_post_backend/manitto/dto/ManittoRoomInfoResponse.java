@@ -10,13 +10,12 @@ public record ManittoRoomInfoResponse(
         String description,
         LocalDateTime deadline,
         Integer participantCount,
-        Integer currentRound,
         ManittoGroupSummary.GroupStatus status,
         boolean isHost,
         ParticipantInfo myInfo,
         ManittoTargetInfo myManitto,
         List<ParticipantInfo> participants,
-        List<ManittoMissionInfo> missions
+        String myMission
 ) {
     public record ParticipantInfo(
             Long memberId,
@@ -28,11 +27,5 @@ public record ManittoRoomInfoResponse(
     public record ManittoTargetInfo(
             Long memberId,
             String nickname
-    ) {}
-
-    public record ManittoMissionInfo(
-            Long missionId,
-            String content,
-            Integer displayOrder
     ) {}
 }

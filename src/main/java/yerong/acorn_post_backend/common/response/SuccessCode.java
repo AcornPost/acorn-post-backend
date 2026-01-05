@@ -23,6 +23,7 @@ public enum SuccessCode {
     ROLLING_MESSAGE_POSITION_UPDATED(HttpStatus.OK, "롤링페이퍼 편지 위치 변경이 성공되었습니다."),
     ROLLING_MESSAGE_DELETED(HttpStatus.OK, "롤링페이퍼 편지 삭제가 성공되었습니다."),
     ROLLING_MESSAGE_UPDATED(HttpStatus.OK, "롤링페이퍼 편지 수정이 성공되었습니다."), // [수정 완료]
+    ROLLING_GROUP_LIST_FETCHED(HttpStatus.OK, "롤링페이퍼 편지 전체 조회가 성공되었습니다."),
 
     MANITTO_MY_GROUPS_FETCHED(HttpStatus.OK, "마니또 그룹 목록 조회 성공"),
     MANITTO_ROOM_INFO_FETCHED(HttpStatus.OK, "마니또 방 정보 조회 성공"),
@@ -32,6 +33,14 @@ public enum SuccessCode {
     MANITTO_REVEALED(HttpStatus.OK, "마니또가 공개되었습니다."),
     MANITTO_ROOM_RESTARTED(HttpStatus.OK, "마니또 방이 재시작되었습니다."),
     MANITTO_LEFT_GROUP(HttpStatus.OK, "그룹을 성공적으로 나갔습니다."),
+
+    LETTERS_FETCHED(HttpStatus.OK, "전체 편지를 성공적으로 조회했습니다."),
+    LETTER_FETCHED(HttpStatus.OK, "편지를 성공적으로 조회했습니다."),
+    TREE_INFO_FETCHED(HttpStatus.OK, "트리를 성공적으로 조회했습니다."),
+    LETTER_CREATED(HttpStatus.OK, "편지를 성공적으로 생성했습니다."),
+    LETTER_UPDATED(HttpStatus.OK, "편지를 성공적으로 수정했습니다."),
+    LETTER_DELETED(HttpStatus.OK, "편지를 성공적으로 삭제했습니다."),
+
     OK(HttpStatus.OK, "요청이 성공되었습니다."),
     CREATED(HttpStatus.CREATED, "생성이 성공되었습니다.");
 

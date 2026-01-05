@@ -14,7 +14,6 @@ public interface ManittoService {
     LeaveGroupResponse leaveGroup(Long memberId, Long groupId);
     void startMatching(Long memberId, Long groupId);
     void reveal(Long memberId, Long groupId);
-    void restart(Long memberId, Long groupId);
     void sendMessage(Long memberId, Long groupId, SendManittoMessageRequest request);
     ManittoMessageListResponse getMyMessages(Long memberId, Long groupId);
     List<ManittoGroupSummary> getMyGroups(Long memberId);

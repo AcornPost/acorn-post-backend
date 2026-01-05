@@ -21,8 +21,10 @@ import yerong.acorn_post_backend.member.domain.Member;
 @Entity
 @Table(
         name = "group_members",
-        uniqueConstraints = @UniqueConstraint(name = "uk_group_members_group_member", columnNames = {"group_id", "member_id"})
-)
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_group_members_group_member", columnNames = {"group_id", "member_id"}),
+                @UniqueConstraint(name = "uk_group_members_group_nickname", columnNames = {"group_id", "groupNickname"})
+        })
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupMember extends BaseTimeEntity {
@@ -30,6 +32,9 @@ public class GroupMember extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "group_member_id")
     private Long id;
+
+    @Column(nullable = false, length = 30)
+    private String groupNickname;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "group_id", nullable = false)
@@ -47,19 +52,24 @@ public class GroupMember extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private GroupMemberStatus status;
 
-    private GroupMember(Group group, Member member, GroupMemberRole role) {
+    private GroupMember(Group group, String niclname, Member member, GroupMemberRole role) {
         this.group = group;
+        this.groupNickname = niclname;
         this.member = member;
         this.role = role;
         this.status = GroupMemberStatus.ACTIVE;
     }
 
-    public static GroupMember host(Group group, Member member) {
-        return new GroupMember(group, member, GroupMemberRole.HOST);
+    public static GroupMember host(Group group, Member member, String groupNickname) {
+        return new GroupMember(group, groupNickname, member, GroupMemberRole.HOST);
     }
 
-    public static GroupMember member(Group group, Member member) {
-        return new GroupMember(group, member, GroupMemberRole.MEMBER);
+    public static GroupMember member(Group group, Member member, String groupNickname) {
+        return new GroupMember(group, groupNickname, member, GroupMemberRole.MEMBER);
+    }
+
+    public void updateNickname(String newNickname) {
+        this.groupNickname = newNickname;
     }
 
     public boolean isActive() {
