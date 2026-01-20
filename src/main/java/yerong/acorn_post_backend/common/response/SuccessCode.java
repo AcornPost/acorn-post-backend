@@ -15,6 +15,7 @@ public enum SuccessCode {
     GROUP_JOINED(HttpStatus.OK, "그룹 참여가 성공되었습니다."),
     GROUP_ALREADY_JOINED(HttpStatus.OK, "이미 참여한 숲입니다."),
     GROUP_LIST_FETCHED(HttpStatus.OK, "내 숲 목록 조회가 성공되었습니다."),
+    GROUP_FETCHED(HttpStatus.OK, "내 숲 조회가 성공되었습니다."),
 
     // ===== Rolling Paper =====
     ROLLING_GROUP_MEMBERS_FETCHED(HttpStatus.OK, "롤링페이퍼 그룹 멤버 조회가 성공되었습니다."),
@@ -24,6 +25,7 @@ public enum SuccessCode {
     ROLLING_MESSAGE_DELETED(HttpStatus.OK, "롤링페이퍼 편지 삭제가 성공되었습니다."),
     ROLLING_MESSAGE_UPDATED(HttpStatus.OK, "롤링페이퍼 편지 수정이 성공되었습니다."), // [수정 완료]
     ROLLING_GROUP_LIST_FETCHED(HttpStatus.OK, "롤링페이퍼 편지 전체 조회가 성공되었습니다."),
+    ROLLING_PAPER_COLOR_UPDATED(HttpStatus.OK, "롤링페이퍼 색상 변경이 성공되었습니다."),
 
     MANITTO_MY_GROUPS_FETCHED(HttpStatus.OK, "마니또 그룹 목록 조회 성공"),
     MANITTO_ROOM_INFO_FETCHED(HttpStatus.OK, "마니또 방 정보 조회 성공"),
@@ -34,12 +36,18 @@ public enum SuccessCode {
     MANITTO_ROOM_RESTARTED(HttpStatus.OK, "마니또 방이 재시작되었습니다."),
     MANITTO_LEFT_GROUP(HttpStatus.OK, "그룹을 성공적으로 나갔습니다."),
 
-    LETTERS_FETCHED(HttpStatus.OK, "전체 편지를 성공적으로 조회했습니다."),
+    TREE_CREATED(HttpStatus.CREATED, "트리가 성공적으로 생성되었습니다."),
+    TREE_DELETED(HttpStatus.OK, "트리가 성공적으로 삭제되었습니다."),
+    TREE_UPDATED(HttpStatus.OK, "트리 설정이 성공적으로 변경되었습니다."),
+
+    LETTERS_FETCHED(HttpStatus.OK, "편지 목록을 성공적으로 조회했습니다."),
+    TREE_INFO_FETCHED(HttpStatus.OK, "트리 정보를 성공적으로 조회했습니다."),
+    LETTER_CREATED(HttpStatus.CREATED, "편지가 성공적으로 작성되었습니다."),
     LETTER_FETCHED(HttpStatus.OK, "편지를 성공적으로 조회했습니다."),
-    TREE_INFO_FETCHED(HttpStatus.OK, "트리를 성공적으로 조회했습니다."),
-    LETTER_CREATED(HttpStatus.OK, "편지를 성공적으로 생성했습니다."),
-    LETTER_UPDATED(HttpStatus.OK, "편지를 성공적으로 수정했습니다."),
-    LETTER_DELETED(HttpStatus.OK, "편지를 성공적으로 삭제했습니다."),
+    LETTER_UPDATED(HttpStatus.OK, "편지가 성공적으로 수정되었습니다."),
+    LETTER_DELETED(HttpStatus.OK, "편지가 성공적으로 삭제되었습니다."),
+    LETTER_APPROVED(HttpStatus.OK, "편지가 성공적으로 처리되었습니다."),
+    LETTER_REPORTED(HttpStatus.OK, "편지가 성공적으로 신고되었습니다."),
 
     OK(HttpStatus.OK, "요청이 성공되었습니다."),
     CREATED(HttpStatus.CREATED, "생성이 성공되었습니다.");

@@ -16,6 +16,7 @@ import yerong.acorn_post_backend.group.dto.MyGroupsResponse;
 import yerong.acorn_post_backend.rolling.dto.GroupMembersResponse;
 import yerong.acorn_post_backend.rolling.dto.MemberPaperResponse;
 import yerong.acorn_post_backend.rolling.dto.MyRollingGroupsResponse;
+import yerong.acorn_post_backend.rolling.dto.UpdateColorRequest;
 import yerong.acorn_post_backend.rolling.dto.UpdatePositionRequest;
 import yerong.acorn_post_backend.rolling.dto.WriteMessageRequest;
 import yerong.acorn_post_backend.rolling.dto.WriteMessageResponse;
@@ -88,5 +89,14 @@ public class RollingPaperApiController {
         Long memberId = currentMember.get();
         MyRollingGroupsResponse result = rollingPaperService.getMyJoinedGroups(memberId);
         return ApiResponse.success(SuccessCode.ROLLING_GROUP_LIST_FETCHED, result);
+    }
+    @PatchMapping("/{groupId}/paper-color")
+    public ApiResponse<Void> updateMyPaperColor(
+            @PathVariable Long groupId,
+            @RequestBody UpdateColorRequest request
+    ) {
+        Long memberId = currentMember.get();
+        rollingPaperService.updatePaperColor(memberId, groupId, request.color());
+        return ApiResponse.success(SuccessCode.ROLLING_PAPER_COLOR_UPDATED);
     }
 }

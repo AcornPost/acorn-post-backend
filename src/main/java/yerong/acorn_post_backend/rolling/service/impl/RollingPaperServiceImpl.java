@@ -112,10 +112,14 @@ public class RollingPaperServiceImpl implements RollingPaperService {
         String deadline = group.getDeadline()
                 .format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
 
+        GroupMember targetGm = groupMemberRepository.findByGroup_IdAndMember_Id(groupId, targetMemberId)
+                .orElseThrow(() -> new ApiException(ErrorCode.ROLLING_GROUP_MEMBER_ONLY));
+
         return new MemberPaperResponse(
                 targetMemberId,
                 targetMember.getNickname(),
                 deadline,
+                targetGm.getPaperBgColor(),
                 messageDetails
         );
     }
@@ -262,5 +266,12 @@ public class RollingPaperServiceImpl implements RollingPaperService {
                 .collect(Collectors.toList());
 
         return new MyRollingGroupsResponse(rollingPaperGroups);
+    }
+
+    @Override
+    public void updatePaperColor(Long memberId, Long groupId, String color) {
+        GroupMember groupMember = groupMemberRepository.findByGroup_IdAndMember_Id(groupId, memberId)
+                .orElseThrow(() -> new ApiException(ErrorCode.ROLLING_GROUP_MEMBER_ONLY));
+        groupMember.updatePaperBgColor(color);
     }
 }

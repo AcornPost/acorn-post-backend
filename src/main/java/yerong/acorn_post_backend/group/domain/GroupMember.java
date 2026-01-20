@@ -52,6 +52,9 @@ public class GroupMember extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private GroupMemberStatus status;
 
+    @Column(name = "paper_bg_color", length = 20)
+    private String paperBgColor = "#ffffff";
+
     private GroupMember(Group group, String niclname, Member member, GroupMemberRole role) {
         this.group = group;
         this.groupNickname = niclname;
@@ -82,5 +85,8 @@ public class GroupMember extends BaseTimeEntity {
 
     public void leave() {
         this.status = GroupMemberStatus.LEFT;
+    }
+    public void updatePaperBgColor(String color) {
+        this.paperBgColor = color;
     }
 }

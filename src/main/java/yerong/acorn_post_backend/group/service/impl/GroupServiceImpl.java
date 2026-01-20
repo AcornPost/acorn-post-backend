@@ -14,6 +14,7 @@ import yerong.acorn_post_backend.group.domain.GroupMemberRole;
 import yerong.acorn_post_backend.group.domain.GroupType;
 import yerong.acorn_post_backend.group.dto.CreateGroupRequest;
 import yerong.acorn_post_backend.group.dto.CreateGroupResponse;
+import yerong.acorn_post_backend.group.dto.GroupInviteResponse;
 import yerong.acorn_post_backend.group.dto.GroupSummaryResponse;
 import yerong.acorn_post_backend.group.dto.JoinGroupRequest;
 import yerong.acorn_post_backend.group.dto.JoinGroupResponse;
@@ -154,5 +155,18 @@ public class GroupServiceImpl implements GroupService {
         }
 
         groupMember.updateNickname(newNickname);
+    }
+
+    @Override
+    public GroupInviteResponse getGroupByJoinCode(String joinCode) {
+        Group group = groupRepository.findByJoinCode(joinCode)
+                .orElseThrow(() -> new ApiException(ErrorCode.GROUP_NOT_FOUND));
+        return new GroupInviteResponse(
+                group.getId(),
+                group.getName(),
+                group.getDescription(),
+                group.getJoinCode(),
+                group.getType()
+        );
     }
 }

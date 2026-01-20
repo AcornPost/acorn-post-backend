@@ -16,4 +16,5 @@ public interface RollingPaperService {
     void deleteMessage(Long memberId, Long groupId, Long messageId);
     void updateMessage(Long memberId, Long groupId, Long messageId, WriteMessageRequest request);
     MyRollingGroupsResponse getMyJoinedGroups(Long memberId);
+    void updatePaperColor(Long memberId, Long groupId, String color);
 }
