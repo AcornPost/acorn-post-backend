@@ -20,7 +20,7 @@ public class LetterResponse {
     private Boolean isRead;
     private Boolean isMine;
 
-    public static LetterResponse from(Letter letter) {
+    public static LetterResponse from(Letter letter, Long currentMemberId) {
         return LetterResponse.builder()
                 .id(letter.getId())
                 .nickname(letter.getNickname())
@@ -28,7 +28,8 @@ public class LetterResponse {
                 .createdAt(letter.getCreatedAt())
                 .position(new Position(letter.getPositionX(), letter.getPositionY()))
                 .isRead(letter.getIsRead())
-                .isMine(letter.getIsMine())
+                .isMine(currentMemberId != null && letter.getWriter() != null &&
+                        letter.getWriter().getId().equals(currentMemberId))
                 .build();
     }
     @Getter

@@ -1,27 +1,14 @@
 package yerong.acorn_post_backend.tree.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import yerong.acorn_post_backend.tree.domain.Letter;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class LetterRequest {
-    private String nickname;
-    private String content;
+public record LetterRequest(
+        @NotBlank(message = "닉네임은 필수입니다.")
+        @Size(max = 10)
+        String nickname,
 
-    public Letter toEntity(double positionX, double positionY) {
-        return Letter.builder()
-                .nickname(nickname)
-                .content(content)
-                .positionX(positionX)
-                .positionY(positionY)
-                .isMine(true)
-                .isRead(true)
-                .build();
-    }
-}
+        @NotBlank(message = "내용을 입력해주세요.")
+        @Size(max = 260)
+        String content
+) {}

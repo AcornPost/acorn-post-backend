@@ -38,4 +38,16 @@ public class CurrentMemberIdResolver {
                 "알 수 없는 Principal 타입입니다: " + principal.getClass().getName()
         );
     }
+
+    /**
+     * 로그인하지 않은 사용자의 경우 null을 반환
+     * 공개 API에서 선택적 인증이 필요한 경우 사용
+     */
+    public Long getOrNull() {
+        try {
+            return get();
+        } catch (JwtAuthException e) {
+            return null;
+        }
+    }
 }

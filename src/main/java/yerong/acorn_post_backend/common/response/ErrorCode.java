@@ -21,6 +21,7 @@ public enum ErrorCode {
 
     // ===== Member =====
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
+    LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
 
     // ===== Group =====
     GROUP_NOT_FOUND(HttpStatus.NOT_FOUND, "그룹을 찾을 수 없습니다."),
@@ -52,12 +53,18 @@ public enum ErrorCode {
 
     // ===== Letter =====
     LETTER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "편지가 존재하지 않습니다."),
-
+    TREE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 트리가 존재합니다."),
+    TREE_NOT_FOUND(HttpStatus.NOT_FOUND, "트리를 찾을 수 없습니다."),
+    LETTER_NOT_APPROVED(HttpStatus.FORBIDDEN, "승인되지 않은 편지입니다."),
+    LETTER_ALREADY_PROCESSED(HttpStatus.BAD_REQUEST, "이미 처리된 편지입니다."),
+    LETTER_INVALID_INPUT_NICKNAME(HttpStatus.BAD_REQUEST, "보내는 분의 이름을 입력해주세요."),
+    LETTER_INVALID_INPUT_CONTENT(HttpStatus.BAD_REQUEST, "편지 내용을 입력해주세요."),
     // ===== Authorization =====
     FORBIDDEN(HttpStatus.FORBIDDEN, "권한이 없습니다."),
     CONFLICT(HttpStatus.CONFLICT, "요청이 충돌했습니다."),
     ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 해당 멤버에게 메시지를 작성했습니다."),
     DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "이 그룹에는 이미 같은 이름이 있습니다.");
+
     private final HttpStatus status;
     private final String message;
 

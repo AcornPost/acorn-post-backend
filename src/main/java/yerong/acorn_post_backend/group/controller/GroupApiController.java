@@ -6,12 +6,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import yerong.acorn_post_backend.common.response.ApiResponse;
 import yerong.acorn_post_backend.common.response.SuccessCode;
 import yerong.acorn_post_backend.common.security.CurrentMemberIdResolver;
 import yerong.acorn_post_backend.group.dto.CreateGroupRequest;
 import yerong.acorn_post_backend.group.dto.CreateGroupResponse;
+import yerong.acorn_post_backend.group.dto.GroupInviteResponse;
 import yerong.acorn_post_backend.group.dto.JoinGroupRequest;
 import yerong.acorn_post_backend.group.dto.JoinGroupResponse;
 import yerong.acorn_post_backend.group.dto.MyGroupsResponse;
@@ -48,5 +50,10 @@ public class GroupApiController {
         Long memberId = currentMember.get();
         MyGroupsResponse result = groupService.getMyGroups(memberId);
         return ApiResponse.success(SuccessCode.GROUP_LIST_FETCHED, result);
+    }
+    @GetMapping("/invite")
+    public ApiResponse<GroupInviteResponse> getGroupByCode(@RequestParam String joinCode) {
+        GroupInviteResponse result = groupService.getGroupByJoinCode(joinCode);
+        return ApiResponse.success(SuccessCode.GROUP_FETCHED, result);
     }
 }
