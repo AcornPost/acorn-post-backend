@@ -1,8 +1,4 @@
-type Query {
-  health: String!
-}
-
-type Subscription {
+extend type Subscription {
   rollingPaperEvents(groupId: ID!, toMemberId: ID!): RollingPaperEventPayload!
 }
 
