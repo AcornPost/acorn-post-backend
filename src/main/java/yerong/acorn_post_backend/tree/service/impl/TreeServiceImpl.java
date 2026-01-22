@@ -2,6 +2,7 @@ package yerong.acorn_post_backend.tree.service.impl;
 
 import java.security.SecureRandom;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yerong.acorn_post_backend.common.response.ApiException;
@@ -14,6 +15,8 @@ import yerong.acorn_post_backend.tree.dto.TreeCreateRequest;
 import yerong.acorn_post_backend.tree.dto.TreePublicResponse;
 import yerong.acorn_post_backend.tree.dto.TreeResponse;
 import yerong.acorn_post_backend.tree.dto.TreeSettingsRequest;
+import yerong.acorn_post_backend.tree.realtime.event.TreeDomainEvent;
+import yerong.acorn_post_backend.tree.realtime.event.TreeEventType;
 import yerong.acorn_post_backend.tree.repository.LetterRepository;
 import yerong.acorn_post_backend.tree.repository.TreeRepository;
 import yerong.acorn_post_backend.tree.service.TreeService;
@@ -27,6 +30,7 @@ public class TreeServiceImpl implements TreeService {
     private static final String SHARE_CODE_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int SHARE_CODE_LENGTH = 12;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -109,6 +113,11 @@ public class TreeServiceImpl implements TreeService {
                 .orElseThrow(() -> new ApiException(ErrorCode.TREE_NOT_FOUND));
 
         tree.updateTreeName(treeName);
+        eventPublisher.publishEvent(new TreeDomainEvent(
+                tree.getShareCode(),
+                TreeEventType.TREE_TITLE_UPDATED,
+                null
+        ));
     }
 
     private String generateUniqueShareCode() {

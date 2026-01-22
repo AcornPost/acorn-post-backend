@@ -1,0 +1,30 @@
+extend type Subscription {
+  treeEvents(shareCode: String!): TreeEventPayload!
+}
+
+type TreeEventPayload {
+  type: String!
+  letter: TreeLetterPayload
+  stats: TreeStatsPayload
+  tree: TreeMetaPayload
+}
+
+type TreeLetterPayload {
+  id: ID!
+  writerId: ID
+  nickname: String
+  content: String
+  isRead: Boolean!
+  positionX: Float
+  positionY: Float
+  createdAt: String!
+}
+
+type TreeStatsPayload {
+  totalLetters: Int!
+  unreadCount: Int!
+}
+
+type TreeMetaPayload {
+  title: String!
+}

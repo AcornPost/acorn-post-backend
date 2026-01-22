@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yerong.acorn_post_backend.common.response.ApiException;
@@ -17,6 +18,8 @@ import yerong.acorn_post_backend.tree.domain.Tree;
 import yerong.acorn_post_backend.tree.dto.LetterRequest;
 import yerong.acorn_post_backend.tree.dto.LetterResponse;
 import yerong.acorn_post_backend.tree.dto.TreeInfoResponse;
+import yerong.acorn_post_backend.tree.realtime.event.TreeDomainEvent;
+import yerong.acorn_post_backend.tree.realtime.event.TreeEventType;
 import yerong.acorn_post_backend.tree.repository.LetterRepository;
 import yerong.acorn_post_backend.tree.repository.TreeRepository;
 import yerong.acorn_post_backend.tree.service.LetterService;
@@ -29,6 +32,8 @@ public class LetterServiceImpl implements LetterService {
     private final Random random = new Random();
     private final TreeRepository treeRepository;
     private final MemberRepository memberRepository;
+    private final ApplicationEventPublisher eventPublisher;
+
     private LetterResponse.Position generateSafeTreePosition() {
         double[][] leafZones = {
                 {50, 30, 15},
@@ -108,6 +113,14 @@ public class LetterServiceImpl implements LetterService {
                 .build();
 
         Letter savedLetter = letterRepository.save(letter);
+        if (savedLetter.getStatus() == LetterStatus.APPROVED) {
+            eventPublisher.publishEvent(new TreeDomainEvent(
+                    tree.getShareCode(),
+                    TreeEventType.LETTER_ADDED,
+                    savedLetter.getId()
+            ));
+        }
+
         return LetterResponse.from(savedLetter, memberId);
     }
 
@@ -124,9 +137,19 @@ public class LetterServiceImpl implements LetterService {
             }
         }
 
-        if (currentMember != null && letter.getTree().isOwner(currentMember)) {
+        boolean isOwner = currentMember != null && letter.getTree().isOwner(currentMember);
+        boolean wasUnread = Boolean.FALSE.equals(letter.getIsRead());
+
+        if (isOwner && wasUnread) {
             letter.markAsRead();
+
+            eventPublisher.publishEvent(new TreeDomainEvent(
+                    letter.getTree().getShareCode(),
+                    TreeEventType.LETTER_READ,
+                    letter.getId()
+            ));
         }
+
         return LetterResponse.from(letter, memberId);
     }
 
@@ -162,7 +185,14 @@ public class LetterServiceImpl implements LetterService {
         } else if(!letter.getTree().isOwner(currentMember)) {
             throw new ApiException(ErrorCode.FORBIDDEN);
         }
+        String shareCode = letter.getTree().getShareCode();
+        Long letterId = letter.getId();
         letterRepository.delete(letter);
+        eventPublisher.publishEvent(new TreeDomainEvent(
+                shareCode,
+                TreeEventType.LETTER_DELETED,
+                letterId
+        ));
     }
 
     @Override
@@ -177,6 +207,13 @@ public class LetterServiceImpl implements LetterService {
             throw new ApiException(ErrorCode.LETTER_ALREADY_PROCESSED);
         }
         letter.updateStatus(approve ? LetterStatus.APPROVED : LetterStatus.REJECTED);
+        if (approve) {
+            eventPublisher.publishEvent(new TreeDomainEvent(
+                    letter.getTree().getShareCode(),
+                    TreeEventType.LETTER_APPROVED,
+                    letter.getId()
+            ));
+        }
     }
 
     @Override
