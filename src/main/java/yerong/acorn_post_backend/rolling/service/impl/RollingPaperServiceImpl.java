@@ -4,6 +4,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import yerong.acorn_post_backend.common.response.ApiException;
@@ -25,18 +27,23 @@ import yerong.acorn_post_backend.rolling.dto.MyRollingGroupsResponse;
 import yerong.acorn_post_backend.rolling.dto.UpdatePositionRequest;
 import yerong.acorn_post_backend.rolling.dto.WriteMessageRequest;
 import yerong.acorn_post_backend.rolling.dto.WriteMessageResponse;
+import yerong.acorn_post_backend.rolling.realtime.event.RollingEvent;
+import yerong.acorn_post_backend.rolling.realtime.event.RollingEventType;
+import yerong.acorn_post_backend.rolling.realtime.pubsub.RollingMessageEventBus;
 import yerong.acorn_post_backend.rolling.repository.RollingPaperMessageRepository;
 import yerong.acorn_post_backend.rolling.service.RollingPaperService;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class RollingPaperServiceImpl implements RollingPaperService {
 
     private final GroupRepository groupRepository;
     private final GroupMemberRepository groupMemberRepository;
     private final MemberRepository memberRepository;
     private final RollingPaperMessageRepository messageRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     @Transactional(readOnly = true)
@@ -82,7 +89,7 @@ public class RollingPaperServiceImpl implements RollingPaperService {
             throw new ApiException(ErrorCode.ROLLING_GROUP_ONLY);
         }
 
-        if (!groupMemberRepository.existsByGroup_IdAndMember_Id(groupId, targetMemberId)) {
+        if (!groupMemberRepository.existsByGroup_IdAndMember_Id(groupId, member)) {
             throw new ApiException(ErrorCode.ROLLING_GROUP_MEMBER_ONLY);
         }
 
@@ -173,6 +180,7 @@ public class RollingPaperServiceImpl implements RollingPaperService {
         );
 
         messageRepository.save(message);
+        publishEvent(groupId, request.toMemberId(), RollingEventType.ADDED, toDetail(message));
 
         return new WriteMessageResponse(
                 message.getId(),
@@ -203,6 +211,8 @@ public class RollingPaperServiceImpl implements RollingPaperService {
         }
 
         message.updatePosition(request.x(), request.y());
+        publishEvent(groupId, message.getToMember().getId(), RollingEventType.MOVED, toDetail(message));
+
     }
     @Override
     public void deleteMessage(Long memberId, Long groupId, Long messageId) {
@@ -216,8 +226,20 @@ public class RollingPaperServiceImpl implements RollingPaperService {
         if (!message.getGroup().getId().equals(groupId)) {
             throw new ApiException(ErrorCode.INVALID_REQUEST, "잘못된 그룹입니다.");
         }
+        Long toMemberId = message.getToMember().getId();
+        Long fromMemberId = message.getFromMember().getId();
+        String fromNickname = message.getFromMember().getNickname();
 
         messageRepository.delete(message);
+
+        MessageDetailResponse deletedPayload = new MessageDetailResponse(
+                messageId,
+                fromMemberId,
+                fromNickname,
+                null, null, null, null, null, null, null
+        );
+
+        publishEvent(groupId, toMemberId, RollingEventType.DELETED, deletedPayload);
     }
     @Override
     public void updateMessage(Long memberId, Long groupId, Long messageId, WriteMessageRequest request) {
@@ -242,6 +264,7 @@ public class RollingPaperServiceImpl implements RollingPaperService {
                 request.shape(),
                 request.font()
         );
+        publishEvent(groupId, message.getToMember().getId(), RollingEventType.UPDATED, toDetail(message));
     }
 
     @Override
@@ -273,5 +296,29 @@ public class RollingPaperServiceImpl implements RollingPaperService {
         GroupMember groupMember = groupMemberRepository.findByGroup_IdAndMember_Id(groupId, memberId)
                 .orElseThrow(() -> new ApiException(ErrorCode.ROLLING_GROUP_MEMBER_ONLY));
         groupMember.updatePaperBgColor(color);
+    }
+
+    private void publishEvent(Long groupId, Long toMemberId, RollingEventType type, MessageDetailResponse payload) {
+        RollingEvent event = new RollingEvent(groupId, toMemberId, type, payload);
+
+        log.info("[QUEUE_EVENT] type={}, groupId={}, toMemberId={}, messageId={}",
+                type, groupId, toMemberId, payload != null ? payload.id() : null);
+        applicationEventPublisher.publishEvent(event);
+    }
+
+
+    private MessageDetailResponse toDetail(RollingPaperMessage m) {
+        return new MessageDetailResponse(
+                m.getId(),
+                m.getFromMember().getId(),
+                m.getFromMember().getNickname(),
+                m.getContent(),
+                m.getColor(),
+                m.getShape(),
+                m.getFont(),
+                m.getPositionX(),
+                m.getPositionY(),
+                m.getRotation()
+        );
     }
 }

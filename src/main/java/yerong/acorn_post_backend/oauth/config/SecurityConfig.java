@@ -38,9 +38,13 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/api/trees/public/**",
                                 "/api/letters",
-                                "/api/letters/tree-info"
-
-                        ).permitAll()
+                                "/api/letters/tree-info",
+                                "/graphiql/**",
+                                "/graphql",
+                                "/graphql/**",
+                                "/graphql/websocket"
+                                ).permitAll()
+//                        .requestMatchers("/graphql", "/graphql/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtExceptionFilter, UsernamePasswordAuthenticationFilter.class)
@@ -53,7 +57,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("http://localhost:5173");
         configuration.addAllowedMethod("*");
-        configuration.addAllowedHeader("*");
+        configuration.addAllowedHeader("Authorization");
+        configuration.addAllowedHeader("Content-Type");
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

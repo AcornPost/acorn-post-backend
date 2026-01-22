@@ -1,0 +1,25 @@
+type Query {
+  health: String!
+}
+
+type Subscription {
+  rollingPaperEvents(groupId: ID!, toMemberId: ID!): RollingPaperEventPayload!
+}
+
+type RollingPaperEventPayload {
+  type: String!
+  message: RollingMessagePayload!
+}
+
+type RollingMessagePayload {
+  id: ID!
+  fromMemberId: ID!
+  fromNickname: String
+  content: String!
+  color: String
+  shape: String
+  font: String
+  positionX: Float
+  positionY: Float
+  rotation: Float
+}
