@@ -18,11 +18,31 @@ spring:
         use_sql_comments: true
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    client-id: ${KAFKA_CLIENT_ID:acorn-post}
 
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: ${KAFKA_ACKS:all}
+      retries: ${KAFKA_RETRIES:3}
+      properties:
+        max.in.flight.requests.per.connection: ${KAFKA_MAX_IN_FLIGHT:1}
+
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: latest
+      enable-auto-commit: false
+      properties:
+        spring.json.trusted.packages: "yerong.acorn_post_backend"
+        spring.json.value.default.type: "yerong.acorn_post_backend.manitto.realtime.kafka.ManittoChatEvent"
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
 
 logging:
   level:
@@ -32,8 +52,17 @@ logging:
     org.springframework.security: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.zaxxer.hikari: DEBUG
 
 jwt:
-  secret: dev-secret-key-for-development-only-change-in-production-at-least-256-bits
-  access-token-validity: 86400000   # 24시간
-  refresh-token-validity: 604800000  # 7일
+  secret: ${JWT_SECRET:dev-secret-key-for-development-only-change-in-production-at-least-256-bits}
+  access-token-validity: 86400000
+  refresh-token-validity: 604800000
+
+app:
+  kafka:
+    enabled: ${KAFKA_ENABLED:true}
+    topic:
+      manitto-chat: ${KAFKA_TOPIC_MANITTO_CHAT:manitto.chat.v1}
+    group:
+      manitto-chat: ${KAFKA_GROUP_ID_MANITTO_CHAT:acorn-post-manitto-chat}

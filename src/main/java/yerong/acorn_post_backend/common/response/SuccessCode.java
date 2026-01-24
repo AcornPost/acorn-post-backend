@@ -36,6 +36,12 @@ public enum SuccessCode {
     MANITTO_ROOM_RESTARTED(HttpStatus.OK, "마니또 방이 재시작되었습니다."),
     MANITTO_LEFT_GROUP(HttpStatus.OK, "그룹을 성공적으로 나갔습니다."),
 
+    // ===== Manitto Chat =====
+    MANITTO_CHAT_ROOM_FETCHED(HttpStatus.OK, "마니또 채팅방 조회 성공"),
+    MANITTO_CHAT_MESSAGES_FETCHED(HttpStatus.OK, "마니또 채팅 메시지 조회 성공"),
+    MANITTO_CHAT_MESSAGE_SENT(HttpStatus.CREATED, "마니또 채팅 메시지 전송 성공"),
+    MANITTO_CHAT_READ_UPDATED(HttpStatus.OK, "마니또 채팅 읽음 상태 업데이트 성공"),
+
     TREE_CREATED(HttpStatus.CREATED, "트리가 성공적으로 생성되었습니다."),
     TREE_DELETED(HttpStatus.OK, "트리가 성공적으로 삭제되었습니다."),
     TREE_UPDATED(HttpStatus.OK, "트리 설정이 성공적으로 변경되었습니다."),

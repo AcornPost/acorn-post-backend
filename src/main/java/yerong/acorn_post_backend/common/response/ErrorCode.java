@@ -51,6 +51,15 @@ public enum ErrorCode {
     MANITTO_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "마니또 메시지를 찾을 수 없습니다."),
     MANITTO_MATCHING_STARTED_ALREADY(HttpStatus.BAD_REQUEST, "이미 매칭이 시작된 마니또 숲에는 입장할 수 없습니다."),
 
+    // ===== Manitto Chat =====
+    MANITTO_CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "마니또 채팅방을 찾을 수 없습니다."),
+    MANITTO_CHAT_ROOM_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 채팅방에 접근할 권한이 없습니다."),
+    MANITTO_CHAT_ROOM_NOT_ACTIVE(HttpStatus.BAD_REQUEST, "활동이 종료되어 채팅을 보낼 수 없습니다."),
+    MANITTO_CHAT_MESSAGE_EMPTY(HttpStatus.BAD_REQUEST, "메시지 내용을 입력해주세요."),
+    MANITTO_CHAT_MESSAGE_TOO_LONG(HttpStatus.BAD_REQUEST, "메시지는 500자 이내로 입력해주세요."),
+    MANITTO_CHAT_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "마니또 채팅 메시지를 찾을 수 없습니다."),
+    MANITTO_CHAT_READ_INVALID(HttpStatus.BAD_REQUEST, "읽음 처리 정보가 올바르지 않습니다."),
+
     // ===== Letter =====
     LETTER_NOT_FOUND(HttpStatus.UNAUTHORIZED, "편지가 존재하지 않습니다."),
     TREE_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 트리가 존재합니다."),

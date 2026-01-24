@@ -42,7 +42,8 @@ public class SecurityConfig {
                                 "/graphiql/**",
                                 "/graphql",
                                 "/graphql/**",
-                                "/graphql/websocket"
+                                "/graphql/websocket",
+                                "/ws-manitto/**"
                                 ).permitAll()
 //                        .requestMatchers("/graphql", "/graphql/**").authenticated()
                         .anyRequest().authenticated()

@@ -15,7 +15,7 @@ public record ManittoRoomInfoResponse(
         ParticipantInfo myInfo,
         ManittoTargetInfo myManitto,
         List<ParticipantInfo> participants,
-        String myMission
+        List<MissionInfo> myMissions
 ) {
     public record ParticipantInfo(
             Long memberId,
@@ -27,5 +27,9 @@ public record ManittoRoomInfoResponse(
     public record ManittoTargetInfo(
             Long memberId,
             String nickname
+    ) {}
+    public record MissionInfo(
+            String description,
+            String subDescription
     ) {}
 }

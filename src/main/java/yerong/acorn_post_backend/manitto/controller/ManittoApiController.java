@@ -7,17 +7,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import yerong.acorn_post_backend.common.response.ApiResponse;
 import yerong.acorn_post_backend.common.response.SuccessCode;
 import yerong.acorn_post_backend.common.security.CurrentMemberIdResolver;
-import yerong.acorn_post_backend.group.dto.CreateGroupResponse;
 import yerong.acorn_post_backend.manitto.dto.LeaveGroupResponse;
 import yerong.acorn_post_backend.manitto.dto.ManittoGroupSummary;
-import yerong.acorn_post_backend.manitto.dto.ManittoMessageListResponse;
 import yerong.acorn_post_backend.manitto.dto.ManittoRoomInfoResponse;
-import yerong.acorn_post_backend.manitto.dto.SendManittoMessageRequest;
 import yerong.acorn_post_backend.manitto.service.ManittoService;
 
 @RestController
@@ -61,25 +57,6 @@ public class ManittoApiController {
         Long memberId = currentMember.get();
         manittoService.reveal(memberId, groupId);
         return ApiResponse.success(SuccessCode.MANITTO_REVEALED, null);
-    }
-
-    @PostMapping("/groups/{groupId}/messages")
-    public ApiResponse<Void> sendMessage(
-            @PathVariable Long groupId,
-            @RequestBody SendManittoMessageRequest request
-    ) {
-        Long memberId = currentMember.get();
-        manittoService.sendMessage(memberId, groupId, request);
-        return ApiResponse.success(SuccessCode.MANITTO_MESSAGE_SENT, null);
-    }
-
-    @GetMapping("/groups/{groupId}/messages")
-    public ApiResponse<ManittoMessageListResponse> getMyMessages(
-            @PathVariable Long groupId
-    ) {
-        Long memberId = currentMember.get();
-        ManittoMessageListResponse response = manittoService.getMyMessages(memberId, groupId);
-        return ApiResponse.success(SuccessCode.MANITTO_MESSAGES_FETCHED, response);
     }
 
     @GetMapping("/groups")

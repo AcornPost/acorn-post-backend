@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,16 +18,14 @@ import yerong.acorn_post_backend.group.repository.GroupMemberRepository;
 import yerong.acorn_post_backend.group.repository.GroupRepository;
 import yerong.acorn_post_backend.manitto.domain.ManittoMatch;
 import yerong.acorn_post_backend.manitto.domain.ManittoMatchStatus;
-import yerong.acorn_post_backend.manitto.domain.ManittoMessage;
 import yerong.acorn_post_backend.manitto.domain.MissionType;
+import yerong.acorn_post_backend.manitto.domain.chat.ManittoChatRoom;
+import yerong.acorn_post_backend.manitto.domain.chat.ManittoChatRoomStatus;
 import yerong.acorn_post_backend.manitto.dto.LeaveGroupResponse;
 import yerong.acorn_post_backend.manitto.dto.ManittoGroupSummary;
-import yerong.acorn_post_backend.manitto.dto.ManittoMessageListResponse;
-import yerong.acorn_post_backend.manitto.dto.ManittoMessageResponse;
 import yerong.acorn_post_backend.manitto.dto.ManittoRoomInfoResponse;
-import yerong.acorn_post_backend.manitto.dto.SendManittoMessageRequest;
 import yerong.acorn_post_backend.manitto.repository.ManittoMatchRepository;
-import yerong.acorn_post_backend.manitto.repository.ManittoMessageRepository;
+import yerong.acorn_post_backend.manitto.repository.chat.ManittoChatRoomRepository;
 import yerong.acorn_post_backend.manitto.service.ManittoService;
 import yerong.acorn_post_backend.member.domain.Member;
 import yerong.acorn_post_backend.member.repository.MemberRepository;
@@ -42,8 +39,7 @@ public class ManittoServiceImpl implements ManittoService {
     private final GroupMemberRepository groupMemberRepository;
     private final MemberRepository memberRepository;
     private final ManittoMatchRepository matchRepository;
-    private final ManittoMessageRepository messageRepository;
-
+    private final ManittoChatRoomRepository roomRepository;
 
     @Override
     public ManittoRoomInfoResponse getRoomInfo(Long memberId, Long groupId) {
@@ -72,13 +68,20 @@ public class ManittoServiceImpl implements ManittoService {
                 }).toList();
 
         ManittoRoomInfoResponse.ManittoTargetInfo myTarget = null;
-        String myMissionContent = null;
+        List<ManittoRoomInfoResponse.MissionInfo> myMissions = null;
 
-        ManittoMatch myMatch = matchRepository.findByGroupAndGiver(group, member).orElse(null);
+        ManittoMatch myMatch = matchRepository.findByGroupAndGiverFetchMissions(group, member).orElse(null);
         if (myMatch != null) {
             myTarget = new ManittoRoomInfoResponse.ManittoTargetInfo(
-                    myMatch.getReceiver().getId(), myMatch.getReceiver().getNickname());
-            myMissionContent = myMatch.getMission().getDescription();
+                    myMatch.getReceiver().getId(),
+                    myMatch.getReceiver().getNickname()
+            );
+            myMissions = myMatch.getMissions().stream()
+                    .map(m -> new ManittoRoomInfoResponse.MissionInfo(
+                            m.getDescription(),
+                            m.getSubDescription()
+                    ))
+                    .toList();
         }
 
         return new ManittoRoomInfoResponse(
@@ -86,7 +89,7 @@ public class ManittoServiceImpl implements ManittoService {
                 group.getDeadline(), members.size(),
                 status, isHost(group, memberId),
                 new ManittoRoomInfoResponse.ParticipantInfo(member.getId(), member.getNickname(), true, null),
-                myTarget, participants, myMissionContent
+                myTarget, participants, myMissions
         );
     }
 
@@ -135,10 +138,14 @@ public class ManittoServiceImpl implements ManittoService {
             Member giver = participants.get(i);
             Member receiver = participants.get((i + 1) % size);
 
-            MissionType randomMission = MissionType.getRandomMissions(1).get(0);
+            List<MissionType> missions = MissionType.getRandomMissions(3);
+            matchRepository.save(ManittoMatch.create(group, giver, receiver, missions));
 
-            ManittoMatch match = ManittoMatch.create(group, giver, receiver, randomMission);
-            matchRepository.save(match);
+            roomRepository.findByGroupAndGiverAndReceiver(group, giver, receiver)
+                    .orElseGet(() -> roomRepository.save(
+                            ManittoChatRoom.create(group, giver, receiver)
+                    ));
+
         }
     }
 
@@ -152,40 +159,7 @@ public class ManittoServiceImpl implements ManittoService {
         if (matches.isEmpty()) throw new ApiException(ErrorCode.MANITTO_MATCH_NOT_FOUND);
 
         matches.forEach(ManittoMatch::reveal);
-    }
-
-    @Override
-    @Transactional
-    public void sendMessage(Long memberId, Long groupId, SendManittoMessageRequest request) {
-        Member from = getMember(memberId);
-        Group group = getGroup(groupId);
-
-        ManittoMatch myMatch = matchRepository.findByGroupAndGiver(group, from)
-                .orElseThrow(() -> new ApiException(ErrorCode.MANITTO_MATCH_NOT_FOUND));
-
-        if (myMatch.getStatus() != ManittoMatchStatus.ACTIVE) {
-            throw new ApiException(ErrorCode.INVALID_REQUEST, "활동이 종료되어 쪽지를 보낼 수 없습니다.");
-        }
-
-        ManittoMessage message = ManittoMessage.create(
-                group, from, myMatch.getReceiver(), request.content(), 1);
-        messageRepository.save(message);
-    }
-
-    @Override
-    @Transactional
-    public ManittoMessageListResponse getMyMessages(Long memberId, Long groupId) {
-        Member me = getMember(memberId);
-        Group group = getGroup(groupId);
-
-        List<ManittoMessage> messages = messageRepository
-                .findByGroupAndToMemberOrderByCreatedAtAsc(group, me);
-
-        messages.forEach(ManittoMessage::markAsRead);
-
-        return new ManittoMessageListResponse(messages.stream()
-                .map(m -> new ManittoMessageResponse(m.getId(), m.getContent(), m.getIsRead(), m.getCreatedAt()))
-                .toList());
+        roomRepository.updateStatusByGroup(group, ManittoChatRoomStatus.REVEALED);
     }
 
     @Override
