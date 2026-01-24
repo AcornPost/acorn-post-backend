@@ -1,6 +1,8 @@
 package yerong.acorn_post_backend.manitto.domain;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -11,6 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,24 +44,29 @@ public class ManittoMatch extends BaseTimeEntity {
     @JoinColumn(name = "receiver_member_id", nullable = false)
     private Member receiver;
 
+    @ElementCollection(fetch = FetchType.LAZY)
+    @CollectionTable(
+            name = "manitto_match_missions",
+            joinColumns = @JoinColumn(name = "match_id")
+    )
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private MissionType mission;
+    @Column(name = "mission", nullable = false)
+    private List<MissionType> missions;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ManittoMatchStatus status;
 
-    private ManittoMatch(Group group, Member giver, Member receiver, MissionType mission) {
+    private ManittoMatch(Group group, Member giver, Member receiver, List<MissionType> missions) {
         this.group = group;
         this.giver = giver;
         this.receiver = receiver;
-        this.mission = mission;
+        this.missions = missions;
         this.status = ManittoMatchStatus.ACTIVE;
     }
 
-    public static ManittoMatch create(Group group, Member giver, Member receiver, MissionType mission) {
-        return new ManittoMatch(group, giver, receiver, mission);
+    public static ManittoMatch create(Group group, Member giver, Member receiver, List<MissionType> missions) {
+        return new ManittoMatch(group, giver, receiver, missions);
     }
 
     public void reveal() {
