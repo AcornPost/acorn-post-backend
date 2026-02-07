@@ -3,6 +3,8 @@ package yerong.acorn_post_backend.group.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,6 +19,7 @@ import yerong.acorn_post_backend.group.dto.GroupInviteResponse;
 import yerong.acorn_post_backend.group.dto.JoinGroupRequest;
 import yerong.acorn_post_backend.group.dto.JoinGroupResponse;
 import yerong.acorn_post_backend.group.dto.MyGroupsResponse;
+import yerong.acorn_post_backend.group.dto.UpdateNicknameRequest;
 import yerong.acorn_post_backend.group.service.GroupService;
 
 @RestController
@@ -55,5 +58,15 @@ public class GroupApiController {
     public ApiResponse<GroupInviteResponse> getGroupByCode(@RequestParam String joinCode) {
         GroupInviteResponse result = groupService.getGroupByJoinCode(joinCode);
         return ApiResponse.success(SuccessCode.GROUP_FETCHED, result);
+    }
+
+    @PatchMapping("/{groupId}/nickname")
+    public ApiResponse<Void> updateNickname(
+            @PathVariable Long groupId,
+            @RequestBody UpdateNicknameRequest request
+    ) {
+        Long memberId = currentMember.get();
+        groupService.updateGroupNickname(memberId, groupId, request.nickname());
+        return ApiResponse.success(SuccessCode.OK, null);
     }
 }

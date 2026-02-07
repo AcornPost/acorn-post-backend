@@ -29,7 +29,9 @@ public record ManittoRoomInfoResponse(
             String nickname
     ) {}
     public record MissionInfo(
+            Long missionId,
             String description,
-            String subDescription
+            String subDescription,
+            boolean checked
     ) {}
 }

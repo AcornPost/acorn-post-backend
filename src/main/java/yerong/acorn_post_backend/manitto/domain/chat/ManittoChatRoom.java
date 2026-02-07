@@ -83,7 +83,7 @@ public class ManittoChatRoom extends BaseTimeEntity {
     }
 
 
-    public void reveal() { this.status = ManittoChatRoomStatus.REVEALED; }
+    public void reveal() { this.status = ManittoChatRoomStatus.CLOSED; }
 
     public Long getLastReadMessageId(Long memberId) {
         if (memberLow.getId().equals(memberId)) return lastReadMessageLowId;

@@ -67,7 +67,7 @@ public class RollingPaperServiceImpl implements RollingPaperService {
         List<GroupMemberSummary> members = groupMembers.stream()
                 .map(gm -> new GroupMemberSummary(
                         gm.getMember().getId(),
-                        gm.getMember().getNickname(),
+                        gm.getGroupNickname(),
                         writtenToIds.contains(gm.getMember().getId())
                 ))
                 .collect(Collectors.toList());

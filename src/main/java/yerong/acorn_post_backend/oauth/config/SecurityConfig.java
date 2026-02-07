@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/api/trees/public/**",
                                 "/api/letters",
+                                "/api/letters/{id}",
                                 "/api/letters/tree-info",
                                 "/graphiql/**",
                                 "/graphql",

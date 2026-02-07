@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import yerong.acorn_post_backend.group.domain.Group;
 import yerong.acorn_post_backend.manitto.domain.ManittoMatch;
+import yerong.acorn_post_backend.manitto.domain.ManittoMission;
 import yerong.acorn_post_backend.member.domain.Member;
 
 public interface ManittoMatchRepository extends JpaRepository<ManittoMatch, Long> {

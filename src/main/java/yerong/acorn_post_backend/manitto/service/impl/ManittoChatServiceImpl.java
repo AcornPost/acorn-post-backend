@@ -59,7 +59,7 @@ public class ManittoChatServiceImpl implements ManittoChatService {
         Member partner = "FROM_MANITTO".equals(tab) ? giver : receiver;
         boolean revealName = (match.getStatus() == ManittoMatchStatus.REVEALED);
 
-        String alias = (room.getStatus() == ManittoChatRoomStatus.REVEALED || revealName)
+        String alias = (room.getStatus() == ManittoChatRoomStatus.CLOSED || revealName)
                 ? partner.getNickname()
                 : "익명";
 

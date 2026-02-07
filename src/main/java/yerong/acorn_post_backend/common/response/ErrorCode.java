@@ -51,6 +51,13 @@ public enum ErrorCode {
     MANITTO_MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "마니또 메시지를 찾을 수 없습니다."),
     MANITTO_MATCHING_STARTED_ALREADY(HttpStatus.BAD_REQUEST, "이미 매칭이 시작된 마니또 숲에는 입장할 수 없습니다."),
 
+    // ===== Manitto Mission =====
+    MANITTO_MISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "미션을 찾을 수 없습니다."),
+    MANITTO_MISSION_INVALID_GROUP(HttpStatus.BAD_REQUEST, "그룹에 속하지 않은 미션입니다."),
+    MANITTO_MISSION_CANNOT_UPDATE_AFTER_REVEAL(HttpStatus.BAD_REQUEST, "마니또 공개 이후에는 미션을 수정할 수 없습니다."),
+    MANITTO_MISSION_FORBIDDEN(HttpStatus.FORBIDDEN, "본인의 미션만 수정할 수 있습니다."),
+
+
     // ===== Manitto Chat =====
     MANITTO_CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "마니또 채팅방을 찾을 수 없습니다."),
     MANITTO_CHAT_ROOM_FORBIDDEN(HttpStatus.FORBIDDEN, "해당 채팅방에 접근할 권한이 없습니다."),
