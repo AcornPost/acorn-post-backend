@@ -13,4 +13,5 @@ public interface ManittoService {
     void startMatching(Long memberId, Long groupId);
     void reveal(Long memberId, Long groupId);
     List<ManittoGroupSummary> getMyGroups(Long memberId);
+    void updateMissionCheck(Long memberId, Long groupId, Long missionId, boolean checked);
 }

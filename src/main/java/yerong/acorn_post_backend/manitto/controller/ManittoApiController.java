@@ -3,6 +3,7 @@ package yerong.acorn_post_backend.manitto.controller;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -14,6 +15,7 @@ import yerong.acorn_post_backend.common.security.CurrentMemberIdResolver;
 import yerong.acorn_post_backend.manitto.dto.LeaveGroupResponse;
 import yerong.acorn_post_backend.manitto.dto.ManittoGroupSummary;
 import yerong.acorn_post_backend.manitto.dto.ManittoRoomInfoResponse;
+import yerong.acorn_post_backend.manitto.dto.UpdateMissionCheckRequest;
 import yerong.acorn_post_backend.manitto.service.ManittoService;
 
 @RestController
@@ -64,5 +66,16 @@ public class ManittoApiController {
         Long memberId = currentMember.get();
         List<ManittoGroupSummary> groups = manittoService.getMyGroups(memberId);
         return ApiResponse.success(SuccessCode.MANITTO_MY_GROUPS_FETCHED, groups);
+    }
+
+    @PatchMapping("/groups/{groupId}/missions/{missionId}")
+    public ApiResponse<Void> updateMissionCheck(
+            @PathVariable Long groupId,
+            @PathVariable Long missionId,
+            @RequestBody UpdateMissionCheckRequest request
+    ) {
+        Long memberId = currentMember.get();
+        manittoService.updateMissionCheck(memberId, groupId, missionId, request.checked());
+        return ApiResponse.success(SuccessCode.OK, null);
     }
 }

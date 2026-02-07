@@ -67,8 +67,8 @@ public class LetterApiController {
     public ApiResponse<LetterResponse> readLetter(
             @PathVariable Long id
     ) {
-        Long memberId = currentMemberIdResolver.get();
-        LetterResponse result = letterService.readLetter(id,  memberId);
+        Long memberId = currentMemberIdResolver.getOrNull();
+        LetterResponse result = letterService.readLetter(id, memberId);
         return ApiResponse.success(SuccessCode.LETTER_FETCHED, result);
     }
 

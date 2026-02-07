@@ -85,7 +85,6 @@ public class GroupServiceImpl implements GroupService {
             throw new ApiException(ErrorCode.GROUP_CLOSED);
         }
 
-
         if (group.isExpired(LocalDateTime.now())) {
             throw new ApiException(ErrorCode.GROUP_EXPIRED);
         }
@@ -109,9 +108,11 @@ public class GroupServiceImpl implements GroupService {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new ApiException(ErrorCode.MEMBER_NOT_FOUND));
+
         String nicknameToUse = (request.nickname() != null && !request.nickname().isBlank())
                 ? request.nickname()
                 : member.getNickname();
+
         groupMemberRepository.save(GroupMember.member(group, member, nicknameToUse));
 
         return new JoinGroupResponse(group.getId(), group.getName(), group.getType(), GroupMemberRole.MEMBER, false);

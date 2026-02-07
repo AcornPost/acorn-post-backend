@@ -18,6 +18,7 @@ import yerong.acorn_post_backend.group.repository.GroupMemberRepository;
 import yerong.acorn_post_backend.group.repository.GroupRepository;
 import yerong.acorn_post_backend.manitto.domain.ManittoMatch;
 import yerong.acorn_post_backend.manitto.domain.ManittoMatchStatus;
+import yerong.acorn_post_backend.manitto.domain.ManittoMission;
 import yerong.acorn_post_backend.manitto.domain.MissionType;
 import yerong.acorn_post_backend.manitto.domain.chat.ManittoChatRoom;
 import yerong.acorn_post_backend.manitto.domain.chat.ManittoChatRoomStatus;
@@ -25,6 +26,7 @@ import yerong.acorn_post_backend.manitto.dto.LeaveGroupResponse;
 import yerong.acorn_post_backend.manitto.dto.ManittoGroupSummary;
 import yerong.acorn_post_backend.manitto.dto.ManittoRoomInfoResponse;
 import yerong.acorn_post_backend.manitto.repository.ManittoMatchRepository;
+import yerong.acorn_post_backend.manitto.repository.ManittoMissionRepository;
 import yerong.acorn_post_backend.manitto.repository.chat.ManittoChatRoomRepository;
 import yerong.acorn_post_backend.manitto.service.ManittoService;
 import yerong.acorn_post_backend.member.domain.Member;
@@ -40,11 +42,14 @@ public class ManittoServiceImpl implements ManittoService {
     private final MemberRepository memberRepository;
     private final ManittoMatchRepository matchRepository;
     private final ManittoChatRoomRepository roomRepository;
+    private final ManittoMissionRepository missionRepository;
 
     @Override
     public ManittoRoomInfoResponse getRoomInfo(Long memberId, Long groupId) {
         Member member = getMember(memberId);
         Group group = getGroup(groupId);
+        GroupMember myGroupMember = groupMemberRepository.findByGroupIdAndMemberId(groupId, memberId)
+                .orElseThrow(() -> new ApiException(ErrorCode.NOT_GROUP_MEMBER));
         validateGroupType(group);
 
         List<ManittoMatch> matches = matchRepository.findByGroup(group);
@@ -72,14 +77,21 @@ public class ManittoServiceImpl implements ManittoService {
 
         ManittoMatch myMatch = matchRepository.findByGroupAndGiverFetchMissions(group, member).orElse(null);
         if (myMatch != null) {
+            String targetGroupNickname = groupMemberRepository
+                    .findByGroupIdAndMemberId(groupId, myMatch.getReceiver().getId())
+                    .map(GroupMember::getGroupNickname)
+                    .orElse(myMatch.getReceiver().getNickname());
+
             myTarget = new ManittoRoomInfoResponse.ManittoTargetInfo(
                     myMatch.getReceiver().getId(),
-                    myMatch.getReceiver().getNickname()
+                    targetGroupNickname
             );
             myMissions = myMatch.getMissions().stream()
                     .map(m -> new ManittoRoomInfoResponse.MissionInfo(
-                            m.getDescription(),
-                            m.getSubDescription()
+                            m.getId(),
+                            m.getMission().getDescription(),
+                            m.getMission().getSubDescription(),
+                            m.isChecked()
                     ))
                     .toList();
         }
@@ -88,7 +100,7 @@ public class ManittoServiceImpl implements ManittoService {
                 group.getId(), group.getJoinCode(), group.getName(), group.getDescription(),
                 group.getDeadline(), members.size(),
                 status, isHost(group, memberId),
-                new ManittoRoomInfoResponse.ParticipantInfo(member.getId(), member.getNickname(), true, null),
+                new ManittoRoomInfoResponse.ParticipantInfo(member.getId(), myGroupMember.getGroupNickname(), true, null),
                 myTarget, participants, myMissions
         );
     }
@@ -138,14 +150,18 @@ public class ManittoServiceImpl implements ManittoService {
             Member giver = participants.get(i);
             Member receiver = participants.get((i + 1) % size);
 
+            ManittoMatch match = ManittoMatch.create(group, giver, receiver);
+
             List<MissionType> missions = MissionType.getRandomMissions(3);
-            matchRepository.save(ManittoMatch.create(group, giver, receiver, missions));
+
+            missions.forEach(type -> match.addMission(type));
+
+            matchRepository.save(match);
 
             roomRepository.findByGroupAndGiverAndReceiver(group, giver, receiver)
                     .orElseGet(() -> roomRepository.save(
                             ManittoChatRoom.create(group, giver, receiver)
                     ));
-
         }
     }
 
@@ -159,7 +175,7 @@ public class ManittoServiceImpl implements ManittoService {
         if (matches.isEmpty()) throw new ApiException(ErrorCode.MANITTO_MATCH_NOT_FOUND);
 
         matches.forEach(ManittoMatch::reveal);
-        roomRepository.updateStatusByGroup(group, ManittoChatRoomStatus.REVEALED);
+        roomRepository.updateStatusByGroup(group, ManittoChatRoomStatus.CLOSED);
     }
 
     @Override
@@ -177,6 +193,33 @@ public class ManittoServiceImpl implements ManittoService {
                             1, resolveGroupStatus(group, matches), isHost(group, memberId)
                     );
                 }).toList();
+    }
+
+    @Override
+    @Transactional
+    public void updateMissionCheck(Long memberId, Long groupId, Long missionId, boolean checked) {
+        Member member = getMember(memberId);
+        Group group = getGroup(groupId);
+        validateGroupType(group);
+
+        ManittoMission mission = missionRepository.findByIdFetchMatchAndGroup(missionId)
+                .orElseThrow(() -> new ApiException(ErrorCode.MANITTO_MISSION_NOT_FOUND));
+
+        ManittoMatch match = mission.getMatch();
+
+        if (!match.getGroup().getId().equals(groupId)) {
+            throw new ApiException(ErrorCode.MANITTO_MISSION_INVALID_GROUP);
+        }
+
+        if (match.isRevealed()) {
+            throw new ApiException(ErrorCode.MANITTO_MISSION_CANNOT_UPDATE_AFTER_REVEAL);
+        }
+
+        if (!match.getGiver().getId().equals(memberId)) {
+            throw new ApiException(ErrorCode.MANITTO_MISSION_FORBIDDEN);
+        }
+
+        mission.check(checked);
     }
 
     private Member getMember(Long memberId) {
@@ -208,7 +251,6 @@ public class ManittoServiceImpl implements ManittoService {
     private ManittoGroupSummary.GroupStatus resolveGroupStatus(Group group, List<ManittoMatch> matches) {
         if (matches.isEmpty()) return ManittoGroupSummary.GroupStatus.WAITING;
 
-        // 하나라도 REVEALED 상태면 전체를 완료로 판단
         boolean isRevealed = matches.get(0).getStatus() == ManittoMatchStatus.REVEALED;
         if (isRevealed) return ManittoGroupSummary.GroupStatus.COMPLETED;
 

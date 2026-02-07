@@ -1,5 +1,6 @@
 package yerong.acorn_post_backend.manitto.domain;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -12,7 +13,9 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -44,38 +47,31 @@ public class ManittoMatch extends BaseTimeEntity {
     @JoinColumn(name = "receiver_member_id", nullable = false)
     private Member receiver;
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(
-            name = "manitto_match_missions",
-            joinColumns = @JoinColumn(name = "match_id")
-    )
-    @Enumerated(EnumType.STRING)
-    @Column(name = "mission", nullable = false)
-    private List<MissionType> missions;
+    @OneToMany(mappedBy = "match", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ManittoMission> missions = new ArrayList<>();
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private ManittoMatchStatus status;
 
-    private ManittoMatch(Group group, Member giver, Member receiver, List<MissionType> missions) {
+    private ManittoMatch(Group group, Member giver, Member receiver) {
         this.group = group;
         this.giver = giver;
         this.receiver = receiver;
-        this.missions = missions;
         this.status = ManittoMatchStatus.ACTIVE;
     }
 
-    public static ManittoMatch create(Group group, Member giver, Member receiver, List<MissionType> missions) {
-        return new ManittoMatch(group, giver, receiver, missions);
+    public static ManittoMatch create(Group group, Member giver, Member receiver) {
+        return new ManittoMatch(group, giver, receiver);
     }
 
     public void reveal() {
         this.status = ManittoMatchStatus.REVEALED;
     }
-    public boolean isActive() {
-        return this.status == ManittoMatchStatus.ACTIVE;
+    public void addMission(MissionType type) {
+        missions.add(new ManittoMission(this, type));
     }
-
     public boolean isRevealed() {
         return this.status == ManittoMatchStatus.REVEALED;
     }
